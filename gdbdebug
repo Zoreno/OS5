@@ -1,0 +1,7 @@
+target remote localhost:1234
+
+symbol-file bin/OS5.bin
+
+break kernel_main
+
+continue
