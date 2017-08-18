@@ -5,6 +5,5 @@
 *.iso
 *.bin
 
-deps/
-!deps/include
 deps/include/*
+!deps/include/.gitkeep
