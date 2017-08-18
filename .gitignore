@@ -4,3 +4,7 @@
 ~*
 *.iso
 *.bin
+
+deps/
+!deps/include
+deps/include/*
