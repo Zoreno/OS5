@@ -243,6 +243,7 @@ Name suggestion list:
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <kernel/debug_terminal.h>
 
@@ -270,6 +271,11 @@ extern void page_fault_irq(void);
 // Function definitions
 //==============================================================================
 
+int comp(const void *a, const void *b)
+{
+    return *((int*)a) < *((int*)b); 
+}
+
 void initialize_kernel(multiboot_info_t* mb_info)
 {
     debug_terminal_initialize();
@@ -294,6 +300,33 @@ void initialize_kernel(multiboot_info_t* mb_info)
     
     enable_interrupts();
 
+    int array[10] = {7, 1, 3, 0, 9, 5, 6, 2, 4, 8};
+
+    qsort(array, 10, sizeof(int), comp);
+
+    for(size_t i = 0; i < 10; ++i)
+    {
+        printf("%i\n", array[i]);
+    }
+
+    char *sig = "RSD PTR ";
+    
+    for(char *ptr = 0xC00E0000; ptr < 0xC00FFFFF; ptr += 16)
+    {
+        if(memcmp(ptr, sig, 8) == 0)
+            printf("RSD PTR found!\n");
+    }
+
+    int ebda = *((short*) 0xC000040E);
+    ebda = ebda*0x10 & 0x000FFFFF;
+    ebda += 0xC0000000;
+
+    for(char *ptr = ebda; ptr < ebda + 1024; ptr += 16)
+    {
+        if(memcmp(ptr, sig, 8) == 0)
+            printf("RSD PTR found!\n");
+    }
+    
     /*
     while(1)
     {

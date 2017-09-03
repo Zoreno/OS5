@@ -262,13 +262,19 @@ void *bsearch(
     size_t size,
     int (*compar)(const void *, const void *));
 
-/*
-  void qsort(
+/**
+ * @brief Sorts the array according to the compare function
+ * @param base Base address of the array.
+ * @param nitems Number of items in array.
+ * @param size Size of array entry.
+ * @param compare Compare function.
+ */
+void qsort(
   void *base,
   size_t nitems,
   size_t size,
-  int (*compar)(const void *, const void *));
-*/
+  int (*compare)(const void *, const void *));
+
 
 //==============================================================================
 // End of file
