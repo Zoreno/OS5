@@ -108,7 +108,8 @@ size_t mmap_first_free()
 {
     for(uint32_t entry = 0;
         entry < pmmngr_get_block_count() / BITS_PER_ENTRY;
-        ++entry){
+        ++entry)
+    {
 
         // If the entry is full, go to the next one
         if(_pmmngr_memory_map[entry] == 0xFFFFFFFF)
@@ -859,3 +860,350 @@ void* vmmngr_getPhysicalAddress(pdirectory* dir, uint32_t virt)
 //==============================================================================
 // Dynamic Memory Manager
 //==============================================================================
+
+#define PLACEMENT_BEGIN 0xD0000000U
+#define PLACEMENT_END 0xD0200000U
+
+#define KERNEL_HEAP_START 0xD0200000U
+#define KERNEL_HEAP_END 0xE0000000U
+
+#define PAGE_SIZE 4096U
+
+typedef struct
+{
+    uint32_t size;
+    uint32_t number;
+    uint8_t reserved;
+} __attribute__((packed)) region_t;
+
+static region_t* regions = 0;
+static uint32_t regionCount = 0;
+static uint32_t regionMaxCount = 0;
+static uint32_t firstFreeRegion = 0;
+static void* firstFreeAddr = (void*)KERNEL_HEAP_START;
+static const uint8_t* HEAP_START = (const uint8_t*)KERNEL_HEAP_START;
+static uint32_t heapSize = 0;
+static const uint32_t HEAP_MIN_GROWTH = 0x10000;
+
+uint32_t alignUp(uint32_t val, uint32_t alignment);
+uint32_t alignDown(uint32_t val, uint32_t alignment);
+void* pmalloc(size_t size, uint32_t alignment);
+int heap_grow(size_t size, uint8_t* heapEnd, int continuous);
+void* kmalloc_imp(size_t size, uint32_t alignment);
+
+
+uint32_t alignUp(uint32_t val, uint32_t alignment)
+{
+    if(!alignment)
+    {
+        return val;
+    }
+
+    --alignment;
+
+    return (val + alignment) & ~alignment;
+}
+
+uint32_t alignDown(uint32_t val, uint32_t alignment)
+{
+    if(!alignment)
+    {
+        return val;
+    }
+
+    return val & ~(alignment - 1);
+}
+
+void* pmalloc(size_t size, uint32_t alignment)
+{
+    static uint8_t* nextPlacement = (uint8_t*)PLACEMENT_BEGIN;
+
+    size = alignUp(size, 4);
+
+    uint8_t* currPlacement = (uint8_t*) alignUp((uint32_t) nextPlacement, alignment);
+
+    if(((uint32_t)currPlacement + size) > PLACEMENT_END)
+    {
+        return 0;
+    }
+
+    nextPlacement = currPlacement + size;
+
+
+    return (void*) currPlacement;
+    
+}
+
+int heap_grow(size_t size, uint8_t* heapEnd, int continuous)
+{
+    if((regionCount > 0) && regions[regionCount - 1].reserved && (regionCount >= regionMaxCount))
+    {
+        return 0;
+    }
+
+    uint32_t offset = 0;
+
+    while(offset < size)
+    {
+        phys_addr addr = pmmngr_alloc_block();
+
+        vmmngr_mapPhysicalAddress(
+            vmmngr_get_directory(),
+            (uint32_t)heapEnd + offset,
+            (uint32_t)addr,
+            PTE_PRESENT | PTE_WRITABLE);
+
+        offset += PAGE_SIZE;
+    }
+
+    if((regionCount > 0) && !regions[regionCount - 1].reserved)
+    {
+        regions[regionCount - 1].size += size;
+    }
+    else
+    {
+        regions[regionCount].reserved = 0;
+        regions[regionCount].size = size;
+        regions[regionCount].number = 0;
+
+        ++regionCount;
+    }
+
+    heapSize += size;
+
+    return 1;
+}
+
+#define mm_max(A, B) (((A) > (B)) ? (A): (B))
+
+void* kmalloc_imp(size_t size, uint32_t alignment)
+{
+    static uint32_t consecutiveNumber = 0;
+
+    size_t within = 0xFFFFFFFF;
+
+    if(alignment & HEAP_WITHIN_PAGE)
+    {
+        within = PAGE_SIZE;
+    }
+    else if(alignment & HEAP_WITHIN_64K)
+    {
+        within = 0x10000;
+    }
+
+    int continuous = (alignment & HEAP_CONTINUOUS) ? 1 : 0;
+
+    alignment &= HEAP_ALIGNMENT_MASK;
+
+    if(regions == 0)
+    {
+        return pmalloc(size, alignment);
+    }
+
+    size = alignUp(size, 0);
+
+    int foundFree = 0;
+
+    uint8_t* regionAddress = (uint8_t*) firstFreeAddr;
+
+    for(uint32_t i = firstFreeRegion; i < regionCount; ++i)
+    {
+        if(regions[i].reserved)
+        {
+            foundFree = 1;
+        }
+        else if(!foundFree)
+        {
+            firstFreeRegion = i;
+            firstFreeAddr = regionAddress;
+        }
+
+        uint8_t* alignedAddress = (uint8_t*)alignUp((uintptr_t) regionAddress, alignment);
+        uintptr_t additionalSize = (uintptr_t) alignedAddress - (uintptr_t)regionAddress;
+
+        if(!regions[i].reserved && (regions[i].size >= size + additionalSize) &&
+           (within - (uintptr_t)regionAddress % within >= additionalSize))
+        {
+            if(continuous)
+            {
+                int iscontinuous = 1;
+
+                for(uint32_t virt1 = (uint32_t) alignDown((uintptr_t)alignedAddress, PAGE_SIZE);
+                    (uintptr_t)((uint32_t)virt1 + PAGE_SIZE) <=
+                        (uintptr_t)(alignedAddress + size);
+                    virt1 += PAGE_SIZE)
+                {
+                    uintptr_t phys1 = (uintptr_t) vmmngr_getPhysicalAddress(
+                        vmmngr_get_directory(),
+                        (uint32_t)virt1);
+                    
+                    uintptr_t phys2 = (uintptr_t) vmmngr_getPhysicalAddress(
+                        vmmngr_get_directory(),
+                        (uint32_t)virt1 + PAGE_SIZE);
+
+                    if(phys1 + PAGE_SIZE != phys2)
+                    {
+                        iscontinuous = 0;
+                        break;
+                    }
+                }
+                
+                if(!iscontinuous)
+                {
+                    continue;
+                }
+                    
+            }
+
+            if(alignedAddress != regionAddress)
+            {
+                if(regionCount >= regionMaxCount)
+                {
+                    return 0;
+                }
+
+                memmove(regions + i + 1, regions + i, (regionCount - i) * sizeof(region_t));
+
+                ++regionCount;
+
+                regions[i].size = alignedAddress - regionAddress;
+
+                regions[i].reserved = 0;
+
+                regions[i + 1].size -= regions[i].size;
+
+                regionAddress += regions[i].size;
+
+                ++i;
+            }
+
+            if(regions[i].size > size + additionalSize)
+            {
+                if(regionCount + 1 > regionMaxCount)
+                {
+                    return 0;
+                }
+
+                memmove(
+                    regions + i + 2,
+                    regions + i + 1,
+                    (regionCount - i - 1) * sizeof(region_t));
+
+                ++regionCount;
+
+                regions[i + 1].size = regions[i].size - size;
+                regions[i + 1].reserved = 0;
+                regions[i + 1].number = 0;
+
+                regions[i].size = size;
+            }
+
+            regions[i].reserved = 1;
+            regions[i].number = ++consecutiveNumber;
+
+            return (regionAddress);
+        }
+
+        regionAddress += regions[i].size;
+    }
+
+    uint32_t sizeToGrow = mm_max(HEAP_MIN_GROWTH, alignUp(size * 3 / 2, PAGE_SIZE));
+
+    int success = heap_grow(
+        sizeToGrow,
+        (uint8_t*)((uintptr_t)HEAP_START + heapSize),
+        continuous);
+
+    if(!success)
+    {
+        return 0;
+    }
+
+    return kmalloc_imp(size, alignment);
+}
+
+void* heap_get_current_end()
+{
+    return (void*)(HEAP_START + heapSize);
+}
+
+void init_kernel_heap()
+{
+    uint32_t i = PLACEMENT_BEGIN;
+
+    for(i; i < PLACEMENT_END; i += PAGE_SIZE)
+    {
+        vmmngr_mapPhysicalAddress(
+            vmmngr_get_directory(),
+            i,
+            (uint32_t)pmmngr_alloc_block(),
+            PTE_PRESENT | PTE_WRITABLE);
+    }
+
+    regions = (region_t*)pmalloc(0,0);
+
+    regionCount = 0;
+    regionMaxCount = (PLACEMENT_END - (uint32_t)regions) / sizeof(region_t);
+}
+
+void* kernel_malloc(size_t size)
+{
+    return kmalloc_imp(size, 0);
+}
+
+void* kernel_malloc_a(size_t size, uint32_t alignment)
+{
+    return kmalloc_imp(size, alignment);
+}
+
+void kernel_free(void* addr)
+{
+    if(!addr)
+    {
+        return;
+    }
+
+    uint8_t* regionAddress = (uint8_t*) HEAP_START;
+
+    for(uint32_t i = 0; i < regionCount; ++i)
+    {
+        if(regionAddress == addr && regions[i].reserved)
+        {
+            regions[i].number = 0;
+            regions[i].reserved = 0;
+
+            if(((i + 1) < regionCount) && !regions[i + 1].reserved)
+            {
+                regions[i].size += regions[i + 1].size;
+
+                memmove(regions + i + 1,
+                        regions + i + 2,
+                        (regionCount - 2) * sizeof(region_t));
+
+                --regionCount;
+            }
+
+            if(i > 0 && !regions[i - 1].reserved)
+            {
+                regions[i - 1].size += regions[i].size;
+
+                memmove(regions + i,
+                        regions + i + 1,
+                        (regionCount - 1 - i) * sizeof(region_t));
+
+                --regionCount;
+            }
+
+            if(i < firstFreeRegion)
+            {
+                firstFreeRegion = i;
+                firstFreeAddr = regionAddress;
+            }
+
+            return;
+        }
+
+        regionAddress += regions[i].size;
+    }
+}
+

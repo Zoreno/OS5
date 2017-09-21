@@ -246,7 +246,7 @@
 #include <stdlib.h>
 
 #include <kernel/debug_terminal.h>
-
+#include <kernel/memory_manager.h>
 #include <kernel/multiboot.h>
 
 #include <arch/arch.h>
@@ -330,6 +330,10 @@ void initialize_kernel(multiboot_info_t* mb_info)
 
     vmmngr_initialize();
 
+    printf("Initializing Kernel Heap\n");
+
+    init_kernel_heap();
+
     arch_initialize();
 
     printf("Arch Initialized!\n");
@@ -341,11 +345,7 @@ void initialize_kernel(multiboot_info_t* mb_info)
     printf("ACPI Initialized!\n");
 
     enable_interrupts();
-
-    int* i_ptr = 0x7000;
-
-    *i_ptr = 14;
-
+    
 #if 0
 
     int array[10] = {7, 1, 3, 0, 9, 5, 6, 2, 4, 8};
@@ -358,6 +358,19 @@ void initialize_kernel(multiboot_info_t* mb_info)
     }
 
 #endif
+
+    int* i = kernel_malloc(sizeof(int));
+    int* i2 = kernel_malloc(sizeof(int));
+
+    *i = 14;
+    *i2 = 13;
+
+    printf("i(%#010x): %i\n", i, *i);
+    
+    printf("i2(%#010x): %i\n", i2, *i2);
+
+    kernel_free(i);
+    kernel_free(i2);
 
     /*
       while(1)

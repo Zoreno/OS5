@@ -267,4 +267,22 @@ void* vmmngr_getPhysicalAddress(pdirectory* dir, uint32_t virt);
 // Dynamic Memory Manager
 //==============================================================================
 
+#define HEAP_ALIGNMENT_MASK 0x00FFFFFF
+
+#define BIT(i) (1 << (i))
+
+#define HEAP_WITHIN_PAGE BIT(24)
+#define HEAP_WITHIN_64K BIT(25)
+#define HEAP_CONTINUOUS BIT(31)
+
+void* heap_get_current_end();
+
+void init_kernel_heap();
+
+void* kernel_malloc(size_t size);
+
+void* kernel_malloc_a(size_t size, uint32_t alignment);
+
+void kernel_free(void* addr);
+
 #endif
