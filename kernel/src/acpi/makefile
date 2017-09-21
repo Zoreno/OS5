@@ -8,12 +8,12 @@ SUBDIRS=
 #===============================================================================
 # Objects to build
 #===============================================================================
-OBJECTS=boot.o kernel_main.o debug_terminal.o kernel_panic.o exception.o exception_handlers.o memory_manager.o
+OBJECTS=acpi.o
 
 #===============================================================================
 # Phony declarations
 #===============================================================================
-.phony: subdirs $(SUBDIRS)
+.PHONY: subdirs $(SUBDIRS)
 
 #===============================================================================
 # Default target
@@ -30,9 +30,6 @@ all: subdirs $(OBJECTS)
 # Assembly code template target
 #===============================================================================
 %.o: %.s
-	$(KERNEL_AC) $(KERNEL_AC_FLAGS) $< -o $(KERNEL_BUILD_DIR)/$@
-
-%.o: %.asm
 	$(KERNEL_AC) $(KERNEL_AC_FLAGS) $< -o $(KERNEL_BUILD_DIR)/$@
 
 #===============================================================================
