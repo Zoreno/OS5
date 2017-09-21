@@ -54,7 +54,7 @@ void ltoa(long int i, int base, char *buf)
     ultoa((unsigned long)i, base, buf);
 }
 
-#if 0
+#if 1
 
 void lltoa(long long int i, int base, char *buf)
 {
@@ -168,7 +168,8 @@ void ultoa(unsigned long int i, int base, char *buf)
     buf[opos] = 0;
 }
 
-#if 0
+#if 1
+
 void ulltoa(unsigned long long int i, int base, char *buf)
 {
     int pos = 0;

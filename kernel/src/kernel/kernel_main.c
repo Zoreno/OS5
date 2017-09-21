@@ -346,32 +346,6 @@ void initialize_kernel(multiboot_info_t* mb_info)
 
     enable_interrupts();
     
-#if 0
-
-    int array[10] = {7, 1, 3, 0, 9, 5, 6, 2, 4, 8};
-
-    qsort(array, 10, sizeof(int), comp);
-
-    for(size_t i = 0; i < 10; ++i)
-    {
-        printf("%i\n", array[i]);
-    }
-
-#endif
-
-    int* i = kernel_malloc(sizeof(int));
-    int* i2 = kernel_malloc(sizeof(int));
-
-    *i = 14;
-    *i2 = 13;
-
-    printf("i(%#010x): %i\n", i, *i);
-    
-    printf("i2(%#010x): %i\n", i2, *i2);
-
-    kernel_free(i);
-    kernel_free(i2);
-
     /*
       while(1)
       {

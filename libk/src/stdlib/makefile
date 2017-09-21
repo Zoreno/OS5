@@ -2,7 +2,7 @@
 # Copy to directory and fill in OBJECTS and SUBDIRS
 
 # Objects to compile in this directory
-OBJECTS=abs.o random.o div.o bsearch.o itoa.o strtol.o atoi.o qsort.o
+OBJECTS=abs.o random.o div.o bsearch.o itoa.o strtol.o atoi.o qsort.o alloc.o
 
 # Subdirectories to compile
 SUBDIRS=

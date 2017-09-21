@@ -137,7 +137,7 @@ void ltoa(long int i, int base, char *buf);
  * @param base Number base to convert to
  * @param buf Where to store result
  */
-//void lltoa(long long int i, int base, char *buf);
+void lltoa(long long int i, int base, char *buf);
 
 /**
  * @brief Converts an unsigned integer to string
@@ -161,16 +161,31 @@ void ultoa(unsigned long int i, int base, char *buf);
  * @param base Number base to convert to
  * @param buf Where to store result
  */
-//void ulltoa(unsigned long long int i, int base, char *buf);
+void ulltoa(unsigned long long int i, int base, char *buf);
 
 //==============================================================================
 // Memory Functions
 //==============================================================================
 
-// void *calloc(size_t nitems, size_t size); // Zero-initializes
-// void free(void *ptr);
+/**
+ * @brief Allocates zero-initalized memory
+ * @param nitems Number of elements to be allocated
+ * @param size Size of each element
+ * @return Pointer to allocated memory
+ */
+void *calloc(size_t nitems, size_t size);
 
-// void *malloc(size_t size);
+/**
+ * @brief Frees previously allocated memory
+ * @param ptr Pointer to memory
+ */
+void free(void *ptr);
+
+/**
+ * @brief Allocates a chunk of memory of at least the given size.
+ * @param size Requested size
+ */
+void *malloc(size_t size);
 // void *realloc(void *ptr, size_t size);
 
 //==============================================================================
