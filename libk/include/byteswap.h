@@ -1,15 +1,15 @@
-/* alloc.c --- 
+/* "'(file-name-nondirectory (buffer-file-name))'" --- 
  * 
- * Filename: alloc.c
+ * Filename: "'(file-name-nondirectory (buffer-file-name))'"
  * Description: 
  * Author: Joakim Bertils
  * Maintainer: 
- * Created: Sat Feb 10 00:50:48 2018 (+0100)
+ * Created: "'(current-time-string)'"
  * Version: 
  * Package-Requires: ()
- * Last-Updated: Sat Feb 10 00:51:38 2018 (+0100)
- *           By: Joakim Bertils
- *     Update #: 2
+ * Last-Updated: 
+ *          
+ *     
  * URL: 
  * Doc URL: 
  * Keywords: 
@@ -44,46 +44,13 @@
 
 /* Code: */
 
+#ifndef _LIBK_BYTESWAP_H_
+#define _LIBK_BYTESWAP_H_
 
-
-
-/**
- * @file    alloc.c
- * @author  Joakim Bertils
- * @date    2017-09-21
- * @brief   Memory allocation
- */
-
-#include <stdlib.h>
 #include <stdint.h>
-#include <string.h>
 
-extern void* kernel_malloc(size_t size);
-extern void kernel_free(void* addr);
+// TODO: Implement byteswap for 16, 32 and 64 bit values.
 
-void* calloc(size_t nitems, size_t size)
-{
-    void* mem = kernel_malloc(nitems * size);
+#endif // _LIBK_BYTESWAP_H_
 
-    if(mem)
-    {
-        memset(mem, 0, nitems * size);
-    }
-
-    return mem;
-}
-
-void free(void* ptr)
-{
-    kernel_free(ptr);
-}
-
-void* malloc(size_t size)
-{
-    // TODO: May include some error checks as well as some check
-    // to see if the kernel is properly set up
-    
-    return kernel_malloc(size);
-}
-
-/* alloc.c ends here */
+/* "'(file-name-nondirectory (buffer-file-name))'" ends here */

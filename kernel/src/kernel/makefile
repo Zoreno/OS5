@@ -8,7 +8,7 @@ SUBDIRS=
 #===============================================================================
 # Objects to build
 #===============================================================================
-OBJECTS=boot.o kernel_main.o debug_terminal.o kernel_panic.o exception.o exception_handlers.o memory_manager.o
+OBJECTS=boot.o kernel_main.o debug_terminal.o kernel_panic.o exception.o exception_handlers.o memory_manager.o initrd.o
 
 #===============================================================================
 # Phony declarations

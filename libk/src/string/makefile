@@ -60,7 +60,8 @@ strdup.o \
 strndup.o \
 strcspn.o \
 strspn.o \
-strtok.o
+strtok.o \
+strncmp.o
 SUBDIRS=
 
 all: subdirs $(OBJECTS)

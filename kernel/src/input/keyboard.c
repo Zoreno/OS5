@@ -277,5 +277,8 @@ void keyboard_enc_send_command(uint8_t cmd)
     outportb(KEYBOARD_ENC_CMD_REG, cmd);
 }
 
-void i86_keyboard_irq();
+void i86_keyboard_irq()
+{
+    
+}
 

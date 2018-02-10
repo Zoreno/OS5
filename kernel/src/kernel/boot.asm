@@ -74,7 +74,7 @@ _start:
    mov   ecx, (BootPageDirectory - KERNEL_VIRTUAL_BASE) ; Load physical address of boot page dir
    mov   cr3, ecx               ; Load into CR3
 
-   mov   ecx, cr4               ; Get currnent CR3 value
+   mov   ecx, cr4               ; Get current CR3 value
    or    ecx, 0x00000010        ; Set PSE Bit
    mov   cr4, ecx               ; Store in CR3
 

@@ -133,14 +133,21 @@ char *strcat(char *str1, const char *str2);
 char *strchr(const char *str, int c);
 
 /**
- * @brief Compares two strings
- * @param str1 Pointer to first string
- * @parma str2 Pointer to second string
- * @return 0 if equal
+ * @brief Compares two strings.
+ * @param str1 Pointer to first string.
+ * @param str2 Pointer to second string.
+ * @return 0 if equal.
  */
 int strcmp(const char *str1, const char *str2);
 
-//int strncmp(const char *str1, const char *str2, size_t n);
+/**
+ * @brief Compares up to @n characters of two strings.
+ * @param str1 Pointer to first string.
+ * @param str2 Pointer to second string.
+ * @param n Maximum number of characters to compare.
+ * @return 0 if equal.
+ */
+int strncmp(const char *str1, const char *str2, size_t n);
 
 /**
  * @brief Copies a string to another string
@@ -223,6 +230,7 @@ char *strndup(const char *str, size_t n);
 
 //char *strchrnul(const char *str, int c_in);
 
+//int bcmp(const void *s1, const void *s2, size_t n);
 //void bcopy(const void *src, void *dest, size_t len);
 //void bzero(void *s, size_t len);
 

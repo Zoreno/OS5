@@ -318,11 +318,11 @@ extern uint32_t end;
 
 char* strMemoryTypes[] = {
 
-    {"None"},
-    {"Available"},          // memory_region.type==1
-    {"Reserved"},           // memory_region.type==2
-    {"ACPI Reclaim"},       // memory_region.type==3
-    {"ACPI NVS Memory"}     // memory_region.type==4
+    "None",
+    "Available",          // memory_region.type==1
+    "Reserved",           // memory_region.type==2
+    "ACPI Reclaim",       // memory_region.type==3
+    "ACPI NVS Memory"     // memory_region.type==4
 };
 
 void initialize_kernel(multiboot_info_t* mb_info)
@@ -338,6 +338,18 @@ void initialize_kernel(multiboot_info_t* mb_info)
     printf("mods_count: %i, mods_addr: %#010p\n",
            mb_info->mods_count,
            mb_info->mods_addr);
+
+    if (mb_info->mods_count)
+    {
+        for(unsigned int i = 0; i < mb_info->mods_count; ++i)
+        {
+            multiboot_module_t *mod = ((multiboot_module_t *)mb_info->mods_addr) + i;
+
+            uint32_t module_size = mod->mod_end - mod->mod_start;
+
+            printf("Mod %i address range [%#010p:%#010p] size: %i cmd_line: %s\n", i, mod->mod_start, mod->mod_end, module_size, (char *)mod->cmdline);
+        }
+    }
 
     uint32_t memSize = 1024 + mb_info->mem_lower + mb_info->mem_upper;
 
@@ -443,7 +455,12 @@ void kernel_main(multiboot_info_t* mb_info, uint32_t mb_magic)
 {
     initialize_kernel(mb_info);
 
-    set_on_tick_handler(on_tick);
+    //set_on_tick_handler(on_tick);
+
+    if(mb_info->flags & MULTIBOOT_INFO_CMDLINE)
+    {
+        printf("CMD line: %s\n", (char *)mb_info->cmdline);
+    }
 
     for(;;);
 
