@@ -64,7 +64,7 @@ BootPageDirectory:
    ;; Text section where the actual boot code is placed
    section .text
 _start:
-
+   
    ;; First we activate paging so we can refenence stuff by address.
    ;; This is done in 3 steps:
    ;;

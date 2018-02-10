@@ -4,10 +4,10 @@
 ## Description: 
 ## Author: Joakim Bertils
 ## Maintainer: 
-## Created: Tue Feb  6 21:03:11 2018 (+0100)
+## Created: Sat Feb 10 00:36:57 2018 (+0100)
 ## Version: 
 ## Package-Requires: ()
-## Last-Updated: Tue Feb  6 21:13:39 2018 (+0100)
+## Last-Updated: Sat Feb 10 00:36:58 2018 (+0100)
 ##           By: Joakim Bertils
 ##     Update #: 1
 ## URL: 
@@ -52,7 +52,7 @@
 # Copy to directory and fill in OBJECTS and SUBDIRS
 
 # Objects to compile in this directory
-OBJECTS=abs.o random.o div.o bsearch.o itoa.o strtol.o atoi.o qsort.o alloc.o
+OBJECTS=fmaxf.o extract_word.o issignaling.o
 
 # Subdirectories to compile
 SUBDIRS=

@@ -1,15 +1,15 @@
-/* fputc.c --- 
+/* strtok.c --- 
  * 
- * Filename: fputc.c
+ * Filename: strtok.c
  * Description: 
  * Author: Joakim Bertils
  * Maintainer: 
- * Created: Sat Feb 10 00:48:05 2018 (+0100)
+ * Created: Sat Feb 10 01:18:45 2018 (+0100)
  * Version: 
  * Package-Requires: ()
- * Last-Updated: Sat Feb 10 00:48:06 2018 (+0100)
+ * Last-Updated: Sat Feb 10 01:24:12 2018 (+0100)
  *           By: Joakim Bertils
- *     Update #: 1
+ *     Update #: 4
  * URL: 
  * Doc URL: 
  * Keywords: 
@@ -44,31 +44,32 @@
 
 /* Code: */
 
+#include <string.h>
 
-
-
-/**
- * @file    fputc.c
- * @author  Joakim Bertils
- * @date    2017-07-27
- * @brief   Implementation of standard function fputc
- */
-
-#include <stdio.h>
-
-int fputc(char c, FILE *file)
+char *strtok(char *str, const char *delim)
 {
-    // TODO: Do this correct
+    static char *p = 0;
 
-    if(!file)
-        return -1;
+    if (str)
+    {
+        p = str;
+    }
+    else if(!p)
+    {
+        return 0;
+    }
 
-    if(!file->write)
-        return -1;
+    str = p + strspn(p, delim);
+    p = str + strcspn(str, delim);
 
-    file->write(c);
+    if (p == str)
+    {
+        return p = 0;
+    }
 
-    return 0;
+    p = *p ? *p = 0, p + 1 : 0;
+
+    return str;
 }
 
-/* fputc.c ends here */
+/* strtok.c ends here */

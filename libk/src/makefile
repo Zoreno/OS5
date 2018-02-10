@@ -2,7 +2,7 @@
 OBJECTS=
 
 # Subdirectories to compile
-SUBDIRS=string stdlib stdio
+SUBDIRS=string stdlib stdio math
 
 # Default target. 
 all: subdirs $(OBJECTS)

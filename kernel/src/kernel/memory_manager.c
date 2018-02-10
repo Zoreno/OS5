@@ -1,3 +1,49 @@
+/* memory_manager.c --- 
+ * 
+ * Filename: memory_manager.c
+ * Description: 
+ * Author: Joakim Bertils
+ * Maintainer: 
+ * Created: Fri Feb  9 23:58:32 2018 (+0100)
+ * Version: 
+ * Package-Requires: ()
+ * Last-Updated: Sat Feb 10 00:06:50 2018 (+0100)
+ *           By: Joakim Bertils
+ *     Update #: 11
+ * URL: 
+ * Doc URL: 
+ * Keywords: 
+ * Compatibility: 
+ * 
+ */
+
+/* Commentary: 
+ * 
+ * 
+ * 
+ */
+
+/* Change Log:
+ * 
+ * 
+ */
+
+/* This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or (at
+ * your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with GNU Emacs.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+/* Code: */
+
 /**
  * @file    memory_manager.c
  * @author  Joakim Bertils
@@ -567,8 +613,19 @@ phys_addr pd_entry_pfn(pd_entry e)
     return e & PDE_FRAME;
 }
 
+/**
+ * Address space covered by the page table.
+ */
 #define PTABLE_ADDR_SPACE_SIZE 0x400000
+
+/**
+ * Address space covered by the page directory.
+ */
 #define DTABLE_ADDR_SPACE_SIZE 0x100000000
+
+/**
+ * Size of one page.
+ */
 #define PAGE_SIZE 4096
 
 pdirectory* _cur_directory = 0;
@@ -861,36 +918,142 @@ void* vmmngr_getPhysicalAddress(pdirectory* dir, uint32_t virt)
 // Dynamic Memory Manager
 //==============================================================================
 
+/**
+ * Address to start placement allocation.
+ */ 
 #define PLACEMENT_BEGIN 0xD0000000U
+
+
+/**
+ * Address to end placement allocation.
+ */ 
 #define PLACEMENT_END 0xD0200000U
 
+/**
+ * Address to start kernel heap allocation.
+ */ 
 #define KERNEL_HEAP_START 0xD0200000U
+
+
+/**
+ * Address to end kernel heap allocation.
+ */ 
 #define KERNEL_HEAP_END 0xE0000000U
 
+
+/**
+ * Size of one page of allocation
+ */ 
 #define PAGE_SIZE 4096U
 
+
+/**
+ * Struct representing one heap region used for memory allocation book-keeping.
+ */
 typedef struct
 {
+    /**
+     * Size of the region.
+     */
     uint32_t size;
+
+    /**
+     * Region index
+     */
     uint32_t number;
+
+    /**
+     * Flag to indicate if region is free or reserved.
+     */
     uint8_t reserved;
+    
 } __attribute__((packed)) region_t;
 
+/**
+ * The array of regions used by the heap manager.
+ */
 static region_t* regions = 0;
+
+/**
+ * Number of regions in use.
+ */
 static uint32_t regionCount = 0;
+
+/**
+ * Maximum number of regions.
+ */
 static uint32_t regionMaxCount = 0;
+
+/**
+ * The index of the first free region to speed up the process.
+ */
 static uint32_t firstFreeRegion = 0;
+
+/**
+ * The address of the first free region
+ */
 static void* firstFreeAddr = (void*)KERNEL_HEAP_START;
+
+/**
+ * The address of the start of the memory heap.
+ */
 static const uint8_t* HEAP_START = (const uint8_t*)KERNEL_HEAP_START;
+
+/**
+ * The current heap size in bytes.
+ */
 static uint32_t heapSize = 0;
+
+/**
+ * The minimum size which the heap is allowed to expand.
+ */
 static const uint32_t HEAP_MIN_GROWTH = 0x10000;
 
+/**
+ * Aligns the value to the lowest multiple of alignment above val.
+ * 
+ * @param val The value to align.
+ * @param alignment The alignment multiple.
+ * @return The aligned value.
+ */
 uint32_t alignUp(uint32_t val, uint32_t alignment);
-uint32_t alignDown(uint32_t val, uint32_t alignment);
-void* pmalloc(size_t size, uint32_t alignment);
-int heap_grow(size_t size, uint8_t* heapEnd, int continuous);
-void* kmalloc_imp(size_t size, uint32_t alignment);
 
+/**
+ * Aligns the value down to the largest multiple of alignment below val.
+ * 
+ * @param val The value to align.
+ * @param alignment The alignment multiple.
+ * @return The aligned value.
+ */
+uint32_t alignDown(uint32_t val, uint32_t alignment);
+
+/**
+ * Allocates memory using placement allocation.
+ * 
+ * @param size Size of the allocation.
+ * @param alignment Alignment of the allocation.
+ * @return Address of the newly allocated memory region.
+ */
+void* pmalloc(size_t size, uint32_t alignment);
+
+/**
+ * Grows the heap to make room for more allocations.
+ *
+ * @param size Size to grow.
+ * @param heapEnd Current end of the heap.
+ * @param continuous Flag to indicate whether the new heap memory should be continuous.
+ * @return Non-zero if successfull
+ */
+int heap_grow(size_t size, uint8_t* heapEnd, int continuous);
+
+/**
+ * Internal implementation of kernel memory allocation function.
+ *
+ * @param size Size of the allocation.
+ * @param alignment Alignment of the allocation.
+ * @return Address of the newly allocated memory region.
+ */
+void* kmalloc_imp(size_t size, uint32_t alignment);
 
 uint32_t alignUp(uint32_t val, uint32_t alignment)
 {
@@ -1207,3 +1370,4 @@ void kernel_free(void* addr)
     }
 }
 
+/* memory_manager.c ends here */

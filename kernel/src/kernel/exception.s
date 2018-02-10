@@ -1,50 +1,54 @@
-[bits 32]
+   ;;===========================================================
+   ;; Assembly implementations of the bare ISR's
+   ;;===========================================================
 
-[global interrupt_done]
+   [bits 32]
 
-[extern kernel_panic]
-[extern interrupt_done]
+   [global interrupt_done]
 
-[global divide_by_zero_irq]
-[extern divide_by_zero_handler]
+   [extern kernel_panic]
+   [extern interrupt_done]
+   
+   ;;===========================================================
+   ;; Basic isr routine macro definition
+   ;;===========================================================
+   
+   %macro ISR_ROUTINE 1
 
-    ;; TODO: Rest of handlers
-        
-divide_by_zero_irq:
-        cli
-        pushad
-        cld
+   [global %1_irq]
+   [extern %1_handler]
 
-        call divide_by_zero_handler
+%1_irq:
+   cli                          ; Clear interrupts
+   pushad                       ; Push all state to stack
+   cld                          ; EDX must be cleared on c-code entry.
 
-        popad
-        sti
-        iret
-        
-[global general_protection_fault_irq]
-[extern general_protection_fault_handler]
+   call  %1_handler             ; Call the c handler.
 
-general_protection_fault_irq:
-        cli
-        pushad
-        cld
+   popad                        ; Restore state.
+   sti                          ; Enable new interrupts
+   iret                         ; Return from interrupt.
 
-        call general_protection_fault_handler
+   %endmacro 
 
-        popad
-        sti
-        iret 
-
-[global page_fault_irq]
-[extern page_fault_handler]
-
-page_fault_irq:
-        cli
-        pushad
-        cld
-
-        call page_fault_handler
-
-        popad
-        sti
-        iret
+                                
+   ISR_ROUTINE divide_by_zero   
+   ISR_ROUTINE debug
+   ISR_ROUTINE non_maskable_interrupt
+   ISR_ROUTINE breakpoint
+   ISR_ROUTINE overflow
+   ISR_ROUTINE bound_range
+   ISR_ROUTINE invalid_opcode
+   ISR_ROUTINE device_not_available
+   ISR_ROUTINE double_fault
+   ISR_ROUTINE invalid_tss
+   ISR_ROUTINE seg_not_present
+   ISR_ROUTINE stack_seg_fault
+   ISR_ROUTINE general_protection_fault
+   ISR_ROUTINE page_fault
+   ISR_ROUTINE FPU_exception
+   ISR_ROUTINE alignment_check
+   ISR_ROUTINE machine_check
+   ISR_ROUTINE SIMD_floating_point
+   ISR_ROUTINE virtualization
+   ISR_ROUTINE security

@@ -1,13 +1,13 @@
-/* fputc.c --- 
+/* issignaling.c --- 
  * 
- * Filename: fputc.c
+ * Filename: issignaling.c
  * Description: 
  * Author: Joakim Bertils
  * Maintainer: 
- * Created: Sat Feb 10 00:48:05 2018 (+0100)
+ * Created: Sat Feb 10 00:36:37 2018 (+0100)
  * Version: 
  * Package-Requires: ()
- * Last-Updated: Sat Feb 10 00:48:06 2018 (+0100)
+ * Last-Updated: Sat Feb 10 00:36:39 2018 (+0100)
  *           By: Joakim Bertils
  *     Update #: 1
  * URL: 
@@ -47,28 +47,24 @@
 
 
 
-/**
- * @file    fputc.c
- * @author  Joakim Bertils
- * @date    2017-07-27
- * @brief   Implementation of standard function fputc
- */
+#include <math.h>
 
-#include <stdio.h>
-
-int fputc(char c, FILE *file)
+int __issignalingf(float x)
 {
-    // TODO: Do this correct
+    uint32_t xi;
 
-    if(!file)
-        return -1;
+    extract_word(&xi, x);
 
-    if(!file->write)
-        return -1;
-
-    file->write(c);
-
-    return 0;
+    return (xi & 0x7FC00000) == 0x7FC00000;
 }
 
-/* fputc.c ends here */
+int __issignaling(double x)
+{
+    uint32_t hxi;
+    uint32_t lxi;
+    extract_words_double(&hxi, &lxi, x);
+
+    return (hxi & 0x7FF80000) == (0x7FF80000);
+}
+
+/* issignaling.c ends here */

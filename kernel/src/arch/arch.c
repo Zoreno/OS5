@@ -120,3 +120,8 @@ uint32_t get_tick_count()
 {
     return arch_x86_pit_get_tick_count();
 }
+
+void set_on_tick_handler(on_tick_handler_func on_tick_handler)
+{
+    arch_x86_set_on_tick_handler(on_tick_handler);
+}

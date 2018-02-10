@@ -1,15 +1,15 @@
-/* fputc.c --- 
+/* fmaxf.c --- 
  * 
- * Filename: fputc.c
+ * Filename: fmaxf.c
  * Description: 
  * Author: Joakim Bertils
  * Maintainer: 
- * Created: Sat Feb 10 00:48:05 2018 (+0100)
+ * Created: Sat Feb 10 00:34:07 2018 (+0100)
  * Version: 
  * Package-Requires: ()
- * Last-Updated: Sat Feb 10 00:48:06 2018 (+0100)
+ * Last-Updated: Sat Feb 10 00:34:14 2018 (+0100)
  *           By: Joakim Bertils
- *     Update #: 1
+ *     Update #: 2
  * URL: 
  * Doc URL: 
  * Keywords: 
@@ -45,30 +45,26 @@
 /* Code: */
 
 
+#include <math.h>
 
-
-/**
- * @file    fputc.c
- * @author  Joakim Bertils
- * @date    2017-07-27
- * @brief   Implementation of standard function fputc
- */
-
-#include <stdio.h>
-
-int fputc(char c, FILE *file)
+float fmaxf(float x, float y)
 {
-    // TODO: Do this correct
-
-    if(!file)
-        return -1;
-
-    if(!file->write)
-        return -1;
-
-    file->write(c);
-
-    return 0;
+    if(isgreater(x, y))
+    {
+        return x;
+    }
+    else if(isless(x, y))
+    {
+        return y;
+    }
+    else if(issignaling(x) || issignaling(y))
+    {
+        return x + y;
+    }
+    else
+    {
+        return isnan(y) ? x : y;
+    }
 }
 
-/* fputc.c ends here */
+/* fmaxf.c ends here */

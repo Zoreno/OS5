@@ -1,5 +1,4 @@
 #include <arch/x86/pit.h>
-#include <arch/arch.h>
 
 #define ARCH_X86_PIT_REG_COUNTER0 0x40
 #define ARCH_X86_PIT_REG_COUNTER1 0x41
@@ -9,11 +8,23 @@
 static volatile uint32_t _pit_ticks = 0;
 static int _is_initialized = 0;
 
+static on_tick_handler_func _on_tick_handler = NULL;
+
 void pit_irq();
+
+void arch_x86_set_on_tick_handler(on_tick_handler_func on_tick_handler)
+{
+    _on_tick_handler = on_tick_handler;
+}
 
 void pit_irq()
 {
     ++_pit_ticks;
+
+    if(_on_tick_handler)
+    {
+        _on_tick_handler();
+    }
 }
 
 void arch_x86_pit_send_command(uint8_t cmd)

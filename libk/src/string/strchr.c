@@ -1,13 +1,13 @@
-/* fputc.c --- 
+/* strchr.c --- 
  * 
- * Filename: fputc.c
+ * Filename: strchr.c
  * Description: 
  * Author: Joakim Bertils
  * Maintainer: 
- * Created: Sat Feb 10 00:48:05 2018 (+0100)
+ * Created: Sat Feb 10 01:16:31 2018 (+0100)
  * Version: 
  * Package-Requires: ()
- * Last-Updated: Sat Feb 10 00:48:06 2018 (+0100)
+ * Last-Updated: Sat Feb 10 01:16:32 2018 (+0100)
  *           By: Joakim Bertils
  *     Update #: 1
  * URL: 
@@ -48,27 +48,30 @@
 
 
 /**
- * @file    fputc.c
+ * @file    strchr.c
  * @author  Joakim Bertils
- * @date    2017-07-27
- * @brief   Implementation of standard function fputc
+ * @date    2017-09-22
+ * @brief   LIBK strchr standard function implementation.
  */
 
-#include <stdio.h>
+#include <string.h>
 
-int fputc(char c, FILE *file)
+char *strchr(const char *str, int c)
 {
-    // TODO: Do this correct
+    
+    char val = (char)c;
 
-    if(!file)
-        return -1;
+    while(*str)
+    {
+        if(*str == val)
+        {
+            return str;
+        }
 
-    if(!file->write)
-        return -1;
+        ++str;
+    }
 
-    file->write(c);
-
-    return 0;
+    return NULL;
 }
 
-/* fputc.c ends here */
+/* strchr.c ends here */

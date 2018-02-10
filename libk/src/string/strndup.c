@@ -1,13 +1,13 @@
-/* fputc.c --- 
+/* strndup.c --- 
  * 
- * Filename: fputc.c
+ * Filename: strndup.c
  * Description: 
  * Author: Joakim Bertils
  * Maintainer: 
- * Created: Sat Feb 10 00:48:05 2018 (+0100)
+ * Created: Sat Feb 10 01:17:13 2018 (+0100)
  * Version: 
  * Package-Requires: ()
- * Last-Updated: Sat Feb 10 00:48:06 2018 (+0100)
+ * Last-Updated: Sat Feb 10 01:17:14 2018 (+0100)
  *           By: Joakim Bertils
  *     Update #: 1
  * URL: 
@@ -45,30 +45,30 @@
 /* Code: */
 
 
-
-
 /**
- * @file    fputc.c
+ * @file    strndup.c
  * @author  Joakim Bertils
- * @date    2017-07-27
- * @brief   Implementation of standard function fputc
+ * @date    2017-09-22
+ * @brief   LIBK strndup standard function implementation.
  */
 
-#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
-int fputc(char c, FILE *file)
+char *strndup(const char *str, size_t n)
 {
-    // TODO: Do this correct
+    size_t len = strnlen(str, n);
 
-    if(!file)
-        return -1;
+    char *new = malloc(len + 1);
 
-    if(!file->write)
-        return -1;
+    if(!new)
+    {
+        return NULL;
+    }
 
-    file->write(c);
+    new[len] = '\0';
 
-    return 0;
+    return (char *)memcpy(new, str, len);
 }
 
-/* fputc.c ends here */
+/* strndup.c ends here */

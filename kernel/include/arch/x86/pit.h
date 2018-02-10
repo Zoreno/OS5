@@ -2,6 +2,8 @@
 #define _ARCH_X86_PIT_H
 
 #include <stdint.h>
+#include <arch/arch.h>
+#include <_null.h>
 
 #define ARCH_X86_PIT_OCW_MASK_BINCOUNT      1
 #define ARCH_X86_PIT_OCW_MASK_MODE          0xE
@@ -27,6 +29,7 @@
 #define ARCH_X86_PIT_OCW_COUNTER_1          0x40
 #define ARCH_X86_PIT_OCW_COUNTER_2          0x80
 
+void arch_x86_set_on_tick_handler(on_tick_handler_func on_tick_handler);
 void arch_x86_pit_send_command(uint8_t cmd);
 void arch_x86_pit_send_data(uint16_t counter, uint8_t data);
 uint8_t arch_x86_pit_read_data(uint16_t counter);

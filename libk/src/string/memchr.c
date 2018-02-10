@@ -1,15 +1,15 @@
-/* fputc.c --- 
+/* memchr.c --- 
  * 
- * Filename: fputc.c
+ * Filename: memchr.c
  * Description: 
  * Author: Joakim Bertils
  * Maintainer: 
- * Created: Sat Feb 10 00:48:05 2018 (+0100)
+ * Created: Sat Feb 10 01:15:38 2018 (+0100)
  * Version: 
  * Package-Requires: ()
- * Last-Updated: Sat Feb 10 00:48:06 2018 (+0100)
+ * Last-Updated: Sat Feb 10 01:15:51 2018 (+0100)
  *           By: Joakim Bertils
- *     Update #: 1
+ *     Update #: 2
  * URL: 
  * Doc URL: 
  * Keywords: 
@@ -48,27 +48,29 @@
 
 
 /**
- * @file    fputc.c
+ * @file    memchr.c
  * @author  Joakim Bertils
- * @date    2017-07-27
- * @brief   Implementation of standard function fputc
+ * @date    2017-09-22
+ * @brief   LIBK memchr standard function implementation.
  */
 
-#include <stdio.h>
+#include <string.h>
 
-int fputc(char c, FILE *file)
+void *memchr(const void *str, int c, size_t n)
 {
-    // TODO: Do this correct
+    unsigned char* ptr = (unsigned char*)str;
+    unsigned char val = (unsigned char)c;
+    size_t i;
 
-    if(!file)
-        return -1;
+    for(i = 0; i < n; ++i, ++ptr)
+    {
+        if(*ptr == val)
+        {
+            return ptr;
+        }
+    }
 
-    if(!file->write)
-        return -1;
-
-    file->write(c);
-
-    return 0;
+    return NULL;
 }
 
-/* fputc.c ends here */
+/* memchr.c ends here */

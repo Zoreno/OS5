@@ -1,15 +1,15 @@
-/* fputc.c --- 
+/* extract_word.c --- 
  * 
- * Filename: fputc.c
+ * Filename: extract_word.c
  * Description: 
  * Author: Joakim Bertils
  * Maintainer: 
- * Created: Sat Feb 10 00:48:05 2018 (+0100)
+ * Created: Sat Feb 10 00:34:50 2018 (+0100)
  * Version: 
  * Package-Requires: ()
- * Last-Updated: Sat Feb 10 00:48:06 2018 (+0100)
+ * Last-Updated: Sat Feb 10 00:42:30 2018 (+0100)
  *           By: Joakim Bertils
- *     Update #: 1
+ *     Update #: 5
  * URL: 
  * Doc URL: 
  * Keywords: 
@@ -45,30 +45,57 @@
 /* Code: */
 
 
+#include <math.h>
 
-
-/**
- * @file    fputc.c
- * @author  Joakim Bertils
- * @date    2017-07-27
- * @brief   Implementation of standard function fputc
- */
-
-#include <stdio.h>
-
-int fputc(char c, FILE *file)
+typedef union
 {
-    // TODO: Do this correct
+    float x_f;
+    uint32_t x_int;
+} float_word;
 
-    if(!file)
-        return -1;
+typedef union
+{
+    double x_d;
+    uint32_t x_int[2];
+} double_word;
 
-    if(!file->write)
-        return -1;
+void extract_word(uint32_t* res, float x)
+{
+    float_word fw;
 
-    file->write(c);
+    fw.x_f = x;
 
-    return 0;
+    *res = fw.x_int;
 }
 
-/* fputc.c ends here */
+void extract_words_double(uint32_t* hi, uint32_t* lo, double x)
+{
+    double_word dw;
+
+    dw.x_d = x;
+
+    *hi = dw.x_int[1];
+    *lo = dw.x_int[0];
+}
+
+void extract_high_word_double(uint32_t* hi, double x)
+{
+    double_word dw;
+
+    dw.x_d = x;
+
+    *hi = dw.x_int[1];   
+}
+
+void extract_low_word_double(uint32_t* lo, double x)
+{
+    
+    double_word dw;
+
+    dw.x_d = x;
+    
+    *lo = dw.x_int[0];
+}
+
+
+/* extract_word.c ends here */

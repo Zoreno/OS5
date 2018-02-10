@@ -1,13 +1,13 @@
-/* fputc.c --- 
+/* strnlen.c --- 
  * 
- * Filename: fputc.c
+ * Filename: strnlen.c
  * Description: 
  * Author: Joakim Bertils
  * Maintainer: 
- * Created: Sat Feb 10 00:48:05 2018 (+0100)
+ * Created: Sat Feb 10 01:17:18 2018 (+0100)
  * Version: 
  * Package-Requires: ()
- * Last-Updated: Sat Feb 10 00:48:06 2018 (+0100)
+ * Last-Updated: Sat Feb 10 01:17:19 2018 (+0100)
  *           By: Joakim Bertils
  *     Update #: 1
  * URL: 
@@ -45,30 +45,33 @@
 /* Code: */
 
 
-
-
 /**
- * @file    fputc.c
+ * @file    strnlen.c
  * @author  Joakim Bertils
- * @date    2017-07-27
- * @brief   Implementation of standard function fputc
+ * @date    2017-09-22
+ * @brief   LIBK strnlen standard function implementation.
  */
 
-#include <stdio.h>
+#include <string.h>
 
-int fputc(char c, FILE *file)
+size_t strnlen(const char *str, size_t maxlen)
 {
-    // TODO: Do this correct
+    if(maxlen == 0)
+    {
+        return 0;
+    }
 
-    if(!file)
-        return -1;
+    int i;
+    
+    for(i = 0; i < maxlen; ++i)
+    {
+        if(*str++ == 0)
+        {
+            return i;
+        }
+    }
 
-    if(!file->write)
-        return -1;
-
-    file->write(c);
-
-    return 0;
+    return maxlen;
 }
 
-/* fputc.c ends here */
+/* strnlen.c ends here */

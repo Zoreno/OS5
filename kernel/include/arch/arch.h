@@ -7,6 +7,8 @@
 
 #define ARCH_X86
 
+typedef void(*on_tick_handler_func)(void);
+
 void arch_initialize();
 void arch_shutdown();
 
@@ -26,5 +28,7 @@ void interrupt_done(uint32_t intno);
 void setvect(int intno, IRQ_HANDLER vect, int flags);
 
 uint32_t get_tick_count();
+
+void set_on_tick_handler(on_tick_handler_func on_tick_handler);
 
 #endif

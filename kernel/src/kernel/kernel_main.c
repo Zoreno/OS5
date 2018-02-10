@@ -253,6 +253,8 @@
 
 #include <acpi/acpi.h>
 
+#include <math.h>
+
 //==============================================================================
 // Function forward declarations
 //==============================================================================
@@ -262,8 +264,26 @@ void initialize_kernel(multiboot_info_t* mb_info);
 void install_interrupts();
 
 extern void divide_by_zero_irq(void);
+extern void debug_irq(void);
+extern void non_maskable_interrupt_irq(void);
+extern void breakpoint_irq(void);
+extern void overflow_irq(void);
+extern void bound_range_irq(void);
+extern void invalid_opcode_irq(void);
+extern void device_not_available_irq(void);
+extern void double_fault_irq(void);
+extern void invalid_tss_irq(void);
+extern void seg_not_present_irq(void);
+extern void stack_seg_fault_irq(void);
 extern void general_protection_fault_irq(void);
 extern void page_fault_irq(void);
+extern void FPU_exception_irq(void);
+extern void alignment_check_irq(void);
+extern void machine_check_irq(void);
+extern void SIMD_floating_point_irq(void);
+extern void virtualization_irq(void);
+extern void security_irq(void);
+
 
 //==============================================================================
 // Implementation private data
@@ -272,6 +292,22 @@ extern void page_fault_irq(void);
 //==============================================================================
 // Function definitions
 //==============================================================================
+
+void set_fpu_cw(const uint16_t cw)
+{
+    asm volatile("fldcw %0" :: "m"(cw));
+}
+
+void enable_fpu()
+{
+    printf("Enabling FPU\n");
+
+    size_t cr4;
+    asm volatile ("mov %%cr4, %0" : "=r"(cr4));
+    cr4 |= 0x200;
+    asm volatile ("mov %0, %%cr4" :: "r"(cr4));
+    set_fpu_cw(0x37F);
+}
 
 int comp(const void *a, const void *b)
 {
@@ -283,10 +319,10 @@ extern uint32_t end;
 char* strMemoryTypes[] = {
 
     {"None"},
-    {"Available"},          //memory_region.type==1
-    {"Reserved"},           //memory_region.type==2
-    {"ACPI Reclaim"},       //memory_region.type==3
-    {"ACPI NVS Memory"}     //memory_region.type==4
+    {"Available"},          // memory_region.type==1
+    {"Reserved"},           // memory_region.type==2
+    {"ACPI Reclaim"},       // memory_region.type==3
+    {"ACPI NVS Memory"}     // memory_region.type==4
 };
 
 void initialize_kernel(multiboot_info_t* mb_info)
@@ -344,27 +380,72 @@ void initialize_kernel(multiboot_info_t* mb_info)
 
     printf("ACPI Initialized!\n");
 
+    enable_fpu();
+
     enable_interrupts();
-    
-    /*
-      while(1)
-      {
-      printf("PIT Ticks: %i\n", get_tick_count());
-      }
 
-    */
 
-    for(;;);
+/*
+    while(1)
+    {
+        printf("PIT Ticks: %i\n", get_tick_count());
+    }
+*/
+
 }
 
 void install_interrupts()
 {
     setvect(0, (IRQ_HANDLER)divide_by_zero_irq, 0);
+    setvect(1, (IRQ_HANDLER)debug_irq, 0);
+    setvect(2, (IRQ_HANDLER)non_maskable_interrupt_irq, 0);
+    setvect(3, (IRQ_HANDLER)breakpoint_irq, 0);
+    setvect(4, (IRQ_HANDLER)overflow_irq, 0);
+    setvect(5, (IRQ_HANDLER)bound_range_irq, 0);
+    setvect(6, (IRQ_HANDLER)invalid_opcode_irq, 0);
+    setvect(7, (IRQ_HANDLER)device_not_available_irq, 0);
+    setvect(8, (IRQ_HANDLER)double_fault_irq, 0);
+    setvect(10, (IRQ_HANDLER)invalid_tss_irq, 0);
+    setvect(11, (IRQ_HANDLER)seg_not_present_irq, 0);
+    setvect(12, (IRQ_HANDLER)stack_seg_fault_irq, 0);
     setvect(13, (IRQ_HANDLER)general_protection_fault_irq, 0);
     setvect(14, (IRQ_HANDLER)page_fault_irq, 0);
+    setvect(16, (IRQ_HANDLER)FPU_exception_irq, 0);
+    setvect(17, (IRQ_HANDLER)alignment_check_irq, 0);
+    setvect(18, (IRQ_HANDLER)machine_check_irq, 0);
+    setvect(19, (IRQ_HANDLER)SIMD_floating_point_irq, 0);
+    setvect(20, (IRQ_HANDLER)virtualization_irq, 0);
+    setvect(30, (IRQ_HANDLER)security_irq, 0);
+}
+
+/*
+  void test_fpu()
+  {
+  float f1 = 13.f;
+  float f2 = 14.f;
+
+  float f3 = fmaxf(f1, f2);
+
+  if(f3 - f2 < 0.01f)
+  {
+  printf("fmaxf test passed\n");
+  }
+
+  }
+*/
+
+void on_tick(void)
+{
+    printf("test\n");
 }
 
 void kernel_main(multiboot_info_t* mb_info, uint32_t mb_magic)
 {
     initialize_kernel(mb_info);
+
+    set_on_tick_handler(on_tick);
+
+    for(;;);
+
+    printf("Kernel Finished. Halting...\n");
 }

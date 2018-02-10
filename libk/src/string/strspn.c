@@ -1,15 +1,15 @@
-/* fputc.c --- 
+/* strspn.c --- 
  * 
- * Filename: fputc.c
+ * Filename: strspn.c
  * Description: 
  * Author: Joakim Bertils
  * Maintainer: 
- * Created: Sat Feb 10 00:48:05 2018 (+0100)
+ * Created: Sat Feb 10 01:01:15 2018 (+0100)
  * Version: 
  * Package-Requires: ()
- * Last-Updated: Sat Feb 10 00:48:06 2018 (+0100)
+ * Last-Updated: Sat Feb 10 01:13:39 2018 (+0100)
  *           By: Joakim Bertils
- *     Update #: 1
+ *     Update #: 6
  * URL: 
  * Doc URL: 
  * Keywords: 
@@ -44,31 +44,42 @@
 
 /* Code: */
 
+#include <string.h>
 
-
-
-/**
- * @file    fputc.c
- * @author  Joakim Bertils
- * @date    2017-07-27
- * @brief   Implementation of standard function fputc
- */
-
-#include <stdio.h>
-
-int fputc(char c, FILE *file)
+size_t strspn(const char *s, const char *accept)
 {
-    // TODO: Do this correct
+    const char *p;
+    const char *a;
 
-    if(!file)
-        return -1;
+    size_t count = 0;
 
-    if(!file->write)
-        return -1;
+    // Loop over each character in the input string
+    for (p = s; *p != '\0'; ++p)
+    {
+        // Loop over each character in the accept string
+        for (a = accept; *a != '\0'; ++a)
+        {
+            if(*p == *a)
+            {
+                break;
+            }
+        }
 
-    file->write(c);
-
-    return 0;
+        // If we did not exit the accept loop early, last character
+        // was not valid. Return current count.
+        if (*a == '\0')
+        {
+            return count;
+        }
+        // Else we increase the count and continue the loop
+        else
+        {
+            ++count;
+        }
+    }
+    
+    return count;
 }
 
-/* fputc.c ends here */
+
+/* strspn.c ends here */
